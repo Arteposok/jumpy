@@ -4,10 +4,14 @@ import pygame as pyg
 
 
 class Object:
-    def __init__(self, rect:pyg.Rect, velocity=np.array([0,0])):
+    def __init__(self, rect:pyg.Rect,
+                 use_gravity: bool,
+                 velocity=np.array([0,0])):
+        self.use_gravity=use_gravity
         self.rect=rect
         self.sprite=None
         self.velocity=velocity
+        self.gravity=-1
 
     def set_collide(self):
         def wrapper(func:types.FunctionType):
@@ -20,14 +24,28 @@ class Object:
         return wrapper
 
     def update(self, gravity):
-        self.velocity+=np.array([0,9])
-        print(self.velocity)
+        self.gravity=gravity[1]
+        if self.use_gravity:
+            self.rect=self.rect.move(self.velocity[0],self.velocity[1])
+            self.velocity[0] += gravity[0]
+            self.velocity[1] += gravity[1]
 
     def collide(self, incoming):
-        pass
+        if self.use_gravity:
+            self.rect.move(0, self.velocity[1])
+            self.velocity[1]=0
+
+
+    def set_speed(self, **kw):
+        if kw.get("x"):
+            self.velocity[0]=kw.get("x")
+        if kw.get("y"):
+            self.velocity[1]=kw.get("y")
+        if kw.get("velocity"):
+            self.velocity=np.array(kw.get("velocity"))
 
 class WorldBox:
-    def __init__(self, gravity:tuple[int, int]):
+    def __init__(self, gravity):
         self.gravity=gravity
         self.objects_to_simulate:list[Object]=[]
 
@@ -39,16 +57,6 @@ class WorldBox:
             object.update(self.gravity)
 
 
+
     def add_object(self, object:Object):
         self.objects_to_simulate.append(object)
-
-
-def test_stuff():
-    world=WorldBox((0,9))
-    example=Object(pyg.Rect(0,0,32,32), np.array([0,0]))
-    world.add_object(example)
-    for i in range(100):
-        world.update()
-
-if __name__=="__main__":
-    test_stuff()
