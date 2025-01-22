@@ -9,12 +9,12 @@ class Object:
         self.sprite=None
         self.velocity=velocity
 
-    def set_collide(self, *args, **kw):
+    def set_collide(self):
         def wrapper(func:types.FunctionType):
             self.collide=func
         return wrapper
 
-    def set_update(self, *args, **kw):
+    def set_update(self):
         def wrapper(func:types.FunctionType):
             self.update=func
         return wrapper
@@ -39,7 +39,7 @@ class WorldBox:
             object.update(self.gravity)
 
 
-    def add_object(self, object):
+    def add_object(self, object:Object):
         self.objects_to_simulate.append(object)
 
 
